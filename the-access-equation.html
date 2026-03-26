@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Access Equation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #08080a;
+    --text: #f0ede6;
+    --muted: #6b6860;
+    --accent: #c8ff00;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    position: relative;
+  }
+
+  .section-short { min-height: auto; padding: 8rem 2rem; }
+
+  .section-label {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .section-label.visible { opacity: 1; transform: translateY(0); }
+
+  /* HERO */
+  .hero { text-align: center; }
+
+  .hero-overtitle {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
+    line-height: 1.05;
+    max-width: 850px;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s forwards;
+  }
+
+  .hero-title em { font-style: italic; color: var(--accent); }
+
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 1s 0.8s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* SECTION 1: HOPE */
+  .hope-section { text-align: center; }
+
+  .hope-statement {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    line-height: 1.35;
+    max-width: 780px;
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hope-statement.visible { opacity: 1; transform: translateY(0); }
+  .hope-statement em { font-style: italic; color: var(--accent); }
+
+  .hope-detail {
+    margin-top: 2rem;
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.8;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hope-detail.visible { opacity: 1; transform: translateY(0); }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 auto;
+  }
+
+  /* SECTION 2: FORCE FOR GOOD */
+  .good-section { text-align: center; }
+
+  .good-statement {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    line-height: 1.35;
+    max-width: 780px;
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .good-statement.visible { opacity: 1; transform: translateY(0); }
+  .good-statement em { font-style: italic; color: var(--accent); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 4rem;
+  }
+
+  .two-col-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: left;
+    background: rgba(255,255,255,0.015);
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .two-col-card.visible { opacity: 1; transform: translateY(0); }
+  .two-col-card:hover { border-color: rgba(200,255,0,0.15); background: rgba(200,255,0,0.02); }
+
+  .col-icon { font-size: 1.6rem; margin-bottom: 1rem; }
+  .col-title { font-weight: 500; font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .col-desc { font-size: 0.92rem; color: var(--muted); line-height: 1.7; }
+
+  /* SECTION 3: SIGNS */
+  .signs-section { text-align: center; padding: 6rem 2rem 4rem; }
+
+  .signs-statement {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    line-height: 1.35;
+    max-width: 700px;
+    margin-bottom: 4rem;
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .signs-statement.visible { opacity: 1; transform: translateY(0); }
+
+  .signs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1050px;
+    width: 100%;
+  }
+
+  .sign-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 2.5rem 2rem 2rem;
+    text-align: left;
+    background: rgba(255,255,255,0.015);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sign-card.visible { opacity: 1; transform: translateY(0); }
+  .sign-card:hover { border-color: rgba(200,255,0,0.15); background: rgba(200,255,0,0.02); }
+
+  .sign-number { font-family: var(--serif); font-size: 3rem; color: var(--accent); line-height: 1; margin-bottom: 1rem; }
+  .sign-title { font-weight: 500; font-size: 1.05rem; margin-bottom: 0.6rem; }
+  .sign-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+  .sign-stat {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    border: 1px solid rgba(200,255,0,0.25);
+    border-radius: 100px;
+    padding: 0.3em 0.9em;
+  }
+
+  /* CLOSING */
+  .closing { text-align: center; min-height: 70vh; }
+
+  .closing-text {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.25;
+    max-width: 750px;
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .closing-text.visible { opacity: 1; transform: translateY(0); }
+  .closing-text em { font-style: italic; color: var(--accent); }
+
+  .closing-sub {
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.8;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .closing-sub.visible { opacity: 1; transform: translateY(0); }
+
+  .signature {
+    margin-top: 3rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.8s 0.5s;
+  }
+
+  .signature.visible { opacity: 1; }
+  .signature a { color: var(--accent); text-decoration: none; }
+  .signature a:hover { text-decoration: underline; }
+
+  /* FLOATING BUTTON + MODAL */
+  .fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1.4rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 24px rgba(200,255,0,0.2);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .fab:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(200,255,0,0.3); }
+  .fab svg { width: 16px; height: 16px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #111113;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    width: min(850px, 92vw);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 3rem;
+    position: relative;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.12); }
+
+  .modal-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .modal-title { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1rem; line-height: 1.3; }
+
+  .modal-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    max-width: 600px;
+  }
+
+  .video-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: rgba(255,255,255,0.03);
+    border: 2px dashed rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .video-placeholder svg { width: 40px; height: 40px; opacity: 0.4; }
+
+  .modal video, .modal iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .modal-footer { margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
+  .modal-footer span { color: var(--accent); font-weight: 500; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @media (max-width: 700px) {
+    .section { padding: 3rem 1.5rem; }
+    .two-col { grid-template-columns: 1fr; }
+    .signs-grid { grid-template-columns: 1fr; }
+    .modal { padding: 2rem 1.5rem; }
+    .fab { bottom: 1.2rem; right: 1.2rem; font-size: 0.72rem; padding: 0.75rem 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="section hero">
+  <div class="hero-overtitle">A Vision for AI</div>
+  <h1 class="hero-title">The future belongs to those who can <em>access</em> it.</h1>
+  <p class="hero-sub">Right now, expertise is expensive. Training is gated. Opportunity is unevenly distributed. AI changes who gets to participate.</p>
+  <div class="scroll-hint">
+    Scroll to explore
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- SECTION 1: HOPE -->
+<section class="section hope-section">
+  <div class="section-label" data-reveal>01 — My Hope</div>
+  <div class="hope-statement" data-reveal>
+    The best surgeon, the best teacher, the best lawyer — their knowledge shouldn't be locked behind a <em>price tag</em>.
+  </div>
+  <p class="hope-detail" data-reveal>
+    AI compresses the cost of expertise toward zero. A medical student in rural India can train on the same simulation as someone at Johns Hopkins. A first-generation college student can get tutoring as good as any prep school. The gap between the best institutions and everyone else is collapsing — and it should.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: FORCE FOR GOOD -->
+<section class="section good-section">
+  <div class="section-label" data-reveal>02 — AI as a force for good</div>
+  <div class="good-statement" data-reveal>
+    Healthcare and education. These are where the <em>access gap</em> changes lives — and ends them.
+  </div>
+  <div class="two-col">
+    <div class="two-col-card" data-reveal data-delay="0">
+      <div class="col-icon">🏥</div>
+      <div class="col-title">Healthcare</div>
+      <div class="col-desc">A misdiagnosis in a rural clinic isn't a billing error — it's a death sentence. AI-powered diagnostics and training tools don't just save money. They save the people that the current system forgot about.</div>
+    </div>
+    <div class="two-col-card" data-reveal data-delay="150">
+      <div class="col-icon">📚</div>
+      <div class="col-title">Education</div>
+      <div class="col-desc">The difference between a student who gets personalized mentorship and one who doesn't isn't grades — it's trajectory. AI makes one-on-one guidance scalable for the first time in history.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: SIGNS TODAY -->
+<section class="section section-short signs-section">
+  <div class="section-label" data-reveal>03 — Signs It's Already Happening</div>
+  <div class="signs-statement" data-reveal>This isn't a prediction. It's happening right now.</div>
+  <div class="signs-grid">
+    <div class="sign-card" data-reveal data-delay="0">
+      <div class="sign-number"><$550</div>
+      <div class="sign-title">A neurosurgical trainer in community colleges</div>
+      <div class="sign-desc">My team built ARMIE — a mixed-reality surgical training system that replaces equipment costing hundreds of thousands of dollars. We tested it with community college students through a University at Buffalo collaboration.</div>
+      <div class="sign-stat">4.3 / 5 satisfaction</div>
+    </div>
+    <div class="sign-card" data-reveal data-delay="150">
+      <div class="sign-number">$1K/mo</div>
+      <div class="sign-title">A college student's SaaS, built with AI</div>
+      <div class="sign-desc">A fellow student — no venture backing, no engineering team — used AI to build and ship a SaaS product now generating over $1,000 per month in recurring revenue. What once required a startup now requires a laptop.</div>
+      <div class="sign-stat">Solo founder · Recurring revenue</div>
+    </div>
+    <div class="sign-card" data-reveal data-delay="300">
+      <div class="sign-number">~3m</div>
+      <div class="sign-title">This website, built in minutes</div>
+      <div class="sign-desc">You're looking at it. This entire site — designed, written, and coded — was built in a single conversation with AI. No designer. No developer. One person, one idea, shipped in under an hour.</div>
+      <div class="sign-stat">Click the button in the bottom right to watch ↘</div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="section closing">
+  <div class="closing-text" data-reveal>AI doesn't just make things faster.<br>It decides <em>who gets to build</em>.</div>
+  <p class="closing-sub" data-reveal>My hope is a world where access isn't allocated by geography, wealth, or connections — but by curiosity and follow-through. The tools are here. The question is whether we distribute them.</p>
+  <div class="signature" data-reveal>Built by Aryan &nbsp;·&nbsp; <a href="https://devpost.com/software/armie" target="_blank">See ARMIE →</a></div>
+</section>
+
+<!-- FLOATING BUTTON -->
+<button class="fab" id="fab-btn" aria-label="How this was made">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  How this was made
+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div class="modal-label">Behind The Scenes</div>
+    <div class="modal-title">This site was built live, with AI, in one session.</div>
+    <div class="modal-desc">No templates. No frameworks. I described what I wanted, iterated in conversation, and shipped. The recording below captures the entire process — uncut.</div>
+
+    <!-- ==============================================
+         REPLACE the video-placeholder div below with:
+
+         YouTube:
+         <iframe src="https://youtube.com/embed/YOUR_ID"
+           frameborder="0" allowfullscreen></iframe>
+
+         Loom:
+         <iframe src="https://www.loom.com/embed/YOUR_ID"
+           frameborder="0" allowfullscreen></iframe>
+
+         Local file:
+         <video controls src="recording.mp4"></video>
+    =============================================== -->
+    <iframe
+      width="100%"
+      height="420"
+      src="https://player.vimeo.com/video/1177166750"
+      title="Behind the scenes"
+      frameborder="0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+
+    <div class="modal-footer">
+      Built with <span>AI</span> in a single conversation. Deployed in under ten minutes.
+    </div>
+  </div>
+</div>
+
+<script>
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = parseInt(entry.target.dataset.delay) || 0;
+        setTimeout(() => entry.target.classList.add('visible'), delay);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+
+  const fab = document.getElementById('fab-btn');
+  const overlay = document.getElementById('modal-overlay');
+  const closeBtn = document.getElementById('modal-close');
+
+  fab.addEventListener('click', () => overlay.classList.add('open'));
+  closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') overlay.classList.remove('open'); });
+</script>
+</body>
+</html>
